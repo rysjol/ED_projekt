@@ -3,19 +3,19 @@ library(ggplot2)
 library(shinythemes)
 library(dplyr)
 
-circuits <- read.csv("2014/circuits_2014.csv", stringsAsFactors = F)
-constructorResults <- read.csv("2014/constructorResults_2014.csv", stringsAsFactors = F)
-constructors <- read.csv("2014/constructors_2014.csv", stringsAsFactors = F)
-constructorStandings <- read.csv("2014/constructorStandings_2014.csv", stringsAsFactors = F)
-drivers <- read.csv("2014/drivers_2014.csv", stringsAsFactors = F)
-driverStandings <- read.csv("2014/driverStandings_2014.csv", stringsAsFactors = F)
-lapTimes <- read.csv("2014/lapTimes_2014.csv", stringsAsFactors = F)
-pitStops <- read.csv("2014/pitStops_2014.csv", stringsAsFactors = F)
-qualifying <- read.csv("2014/qualifying_2014.csv", stringsAsFactors = F)
-races <- read.csv("2014/races_2014.csv", stringsAsFactors = F)
-results <- read.csv("2014/results_2014.csv", stringsAsFactors = F)
-seasons <- read.csv("2014/seasons_2014.csv", stringsAsFactors = F)
-status <- read.csv("2014/status_2014.csv", stringsAsFactors = F)
+circuits <- read.csv("dataFiles/circuits.csv", stringsAsFactors = F)
+constructorResults <- read.csv("dataFiles/constructorResults.csv", stringsAsFactors = F)
+constructors <- read.csv("dataFiles/constructors.csv", stringsAsFactors = F)
+constructorStandings <- read.csv("dataFiles/constructorStandings.csv", stringsAsFactors = F)
+drivers <- read.csv("dataFiles/drivers.csv", stringsAsFactors = F)
+driverStandings <- read.csv("dataFiles/driverStandings.csv", stringsAsFactors = F)
+lapTimes <- read.csv("dataFiles/lapTimes.csv", stringsAsFactors = F)
+pitStops <- read.csv("dataFiles/pitStops.csv", stringsAsFactors = F)
+qualifying <- read.csv("dataFiles/qualifying.csv", stringsAsFactors = F)
+races <- read.csv("dataFiles/races.csv", stringsAsFactors = F)
+results <- read.csv("dataFiles/results.csv", stringsAsFactors = F)
+seasons <- read.csv("dataFiles/seasons.csv", stringsAsFactors = F)
+status <- read.csv("dataFiles/status.csv", stringsAsFactors = F)
 
 res <- left_join(results, races, by = "raceId")
 res_drv <- left_join(res, drivers, by = "driverId")
@@ -102,6 +102,36 @@ server <- function(input, output) {
   })
   
   output$not_finished <- renderPlot({
+    if(input$year == "All"){
+      if(input$grand_prix == "All") {
+        data <- all
+      } else {
+        data <- all %>% subset(name.x == input$grand_prix)
+      }
+    } else {
+      if(input$grand_prix == "All") {
+        data <- all
+        data <- data %>% subset(year  == input$year)
+      } else {
+        data <- all
+        data <- data %>% subset(name.x == input$grand_prix)
+        data <- data %>% subset(year  == input$year)
+      }
+    }
+    
+    drv <- input$driver
+    drv_split <- unlist(strsplit(drv, " "))
+    drv_id <- drivers %>% subset(surname == drv_split[2])
+    drv_id <- drv_id$driverId
+    drv_results <- data %>% subset(driverId  == drv_id)
+    drv_results <- drv_results[order(drv_results$date),]
+    drv_dnf <- drv_results %>% subset(!statusId %in% finished_status)
+    ggplot(drv_dnf, aes(date, statusId, colour = as.factor(statusId))) + geom_point(size=3) + ylim(status_limits) + theme_bw() + 
+      scale_color_discrete(name  ="Reason of retirement", breaks = drv_dnf$statusId, labels = drv_dnf$status) +
+      xlab("Date") + ylab("Reason of retirement")
+  })  
+  
+  output$position <- renderPlot({
     if(input$year == "All"){
       if(input$grand_prix == "All") {
         data <- all
