@@ -96,7 +96,9 @@ server <- function(input, output) {
     drv_id <- drv_id$driverId
     drv_results <- data %>% subset(driverId  == drv_id)
     drv_results <- drv_results[order(drv_results$date),]
-    ggplot(drv_results, aes(date, points, colour = year)) + geom_point(size=3) + ylim(points_limits) + theme_bw()
+    ggplot(drv_results, aes(date, points, colour = year, Label = name.y)) + geom_point(size=3) + ylim(points_limits) + theme_bw() +
+      xlab("Date") + ylab("Points")
+
   })
   
   output$not_finished <- renderPlot({
@@ -125,7 +127,8 @@ server <- function(input, output) {
     drv_results <- drv_results[order(drv_results$date),]
     drv_dnf <- drv_results %>% subset(!statusId %in% finished_status)
     ggplot(drv_dnf, aes(date, statusId, colour = as.factor(statusId))) + geom_point(size=3) + ylim(status_limits) + theme_bw() + 
-      scale_color_discrete(name  ="Reason of retirement", breaks = drv_dnf$statusId, labels = drv_dnf$status)
+      scale_color_discrete(name  ="Reason of retirement", breaks = drv_dnf$statusId, labels = drv_dnf$status) +
+      xlab("Date") + ylab("Reason of retirement")
   })  
 }
 
