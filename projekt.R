@@ -20,11 +20,11 @@ status <- read.csv("dataFiles/status.csv", stringsAsFactors = F)
 res <- left_join(results, races, by = "raceId")
 res_drv <- left_join(res, drivers, by = "driverId")
 res_drv_con <- left_join(res_drv, constructors, by = "constructorId")
-res_drv_con_cir <- left_join(res_drv_con, circuits, by = 'circuitId')
+res_drv_con_cir <- left_join(res_drv_con, circuits, by = "circuitId")
 all <- left_join(res_drv_con_cir, status, by = "statusId")
 
 ui <- fluidPage(theme=shinytheme("sandstone"),
-                titlePanel("2014-2017 F1 results analysis"),
+                titlePanel("2014-2017 F1 Results analysis"),
                 sidebarLayout(
                   
                   # Inputs
@@ -58,10 +58,12 @@ ui <- fluidPage(theme=shinytheme("sandstone"),
                   mainPanel(
                     tabsetPanel(type="tabs",
                                 tabPanel("Points", plotOutput("points")),
-                                tabPanel("Not finished", plotOutput("not_finished"))
+                                tabPanel("Not finished", plotOutput("not_finished")),
+                                tabPanel("Possition difference", plotOutput("position"))
                                 #,
                                 #tabPanel("description1", plotOutput("id1")),
-                                #tabPanel("description2", plotOutput("id2"))
+                                #tabPanel("description2", plotOutput("id2")),
+                                #tabPanel("description3", plotOutput("id3"))
                     )
                   )
                 )
@@ -70,6 +72,7 @@ ui <- fluidPage(theme=shinytheme("sandstone"),
 server <- function(input, output) {
   points_limits = c(0,25)
   status_limits = c(0, 136)
+  diff_limits = c(-22, 22)
   finished_status <- c(1, 11, 12, 13, 14, 16, 18)
   
   output$points <- renderPlot({
@@ -155,11 +158,11 @@ server <- function(input, output) {
     drv_id <- drv_id$driverId
     drv_results <- data %>% subset(driverId  == drv_id)
     drv_results <- drv_results[order(drv_results$date),]
-    drv_dnf <- drv_results %>% subset(!statusId %in% finished_status)
-    ggplot(drv_dnf, aes(date, statusId, colour = as.factor(statusId))) + geom_point(size=3) + ylim(status_limits) + theme_bw() + 
-      scale_color_discrete(name  ="Reason of retirement", breaks = drv_dnf$statusId, labels = drv_dnf$status) +
-      xlab("Date") + ylab("Reason of retirement")
-  })  
+    drv_results$difference <- drv_results$grid - drv_results$positionOrder
+    ggplot(drv_results, aes(date, difference, colour = as.factor(difference))) + geom_point(size=3) + ylim(diff_limits) + 
+      scale_color_discrete(name  ="Difference") +
+      theme_bw() + xlab("Date") + ylab("Possition difference")
+  })
 }
 
 shinyApp(ui = ui, server = server)
