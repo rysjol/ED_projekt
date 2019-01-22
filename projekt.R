@@ -23,7 +23,7 @@ res_drv_con <- left_join(res_drv, constructors, by = "constructorId")
 res_drv_con_cir <- left_join(res_drv_con, circuits, by = "circuitId")
 all <- left_join(res_drv_con_cir, status, by = "statusId")
 
-ui <- fluidPage(theme=shinytheme("sandstone"),
+ui <- fluidPage(theme=shinytheme("cerulean"),
                 titlePanel("2014-2017 F1 Results analysis"),
                 sidebarLayout(
                   
