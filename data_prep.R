@@ -41,3 +41,4 @@ write.csv(qualifying_2014, "2014/qualifying_2014.csv", row.names = FALSE)
 write.csv(results_2014, "2014/results_2014.csv", row.names = FALSE)
 write.csv(seasons_2014, "2014/seasons_2014.csv", row.names = FALSE)
 write.csv(status_2014, "2014/status_2014.csv", row.names = FALSE)
+
